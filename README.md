@@ -1,16 +1,28 @@
 # 🎬 Análise de filmes IMDb: avaliação do público e desempenho financeiro
 
-Projeto de análise de dados com **Python e Power BI** para explorar a relação entre avaliação do público, orçamento e receita de filmes. A investigação combina preparação dos dados, análise exploratória e comunicação dos resultados em um dashboard.
+Projeto de análise de dados desenvolvido no desafio de Análise de Dados da comunidade **First Commit-m**. A pergunta central é: **filmes bem avaliados também são os que mais faturam?**
+
+Preparei a base em **Python (pandas, NumPy)**, explorei os dados com **SQL no Databricks** e apresentei os resultados em um dashboard de quatro páginas no **Power BI**, disponível neste repositório em formato PBIP ([`imdb_dashboard/`](imdb_dashboard/)).
+
+## Resultado em números
+
+| Etapa | Quantidade |
+| --- | --- |
+| Filmes na base tratada | 9.999 |
+| Filmes sem nota válida | 209 |
+| Filmes bem avaliados (score ≥ 80) | 429 |
+| Registros com receita suspeita | 4.287 |
+| Registros com orçamento suspeito | 350 |
+| Registros com dados financeiros conflitantes | 168 |
+| Filmes com orçamento e receita confiáveis para análise financeira | 5.369 |
+
+43% dos registros tiveram a receita sinalizada pelas regras de triagem. Por isso, as análises financeiras usam apenas os 5.369 filmes com orçamento e receita considerados confiáveis.
 
 ## Contexto de negócio
 
-Uma empresa de produção e distribuição de filmes deseja entender onde investir: quais características estão associadas a boas avaliações e quais estão relacionadas ao desempenho financeiro?
-
-A pergunta central é: **filmes bem avaliados também são os que mais faturam?** O objetivo é investigar essa relação com evidências, reconhecer as limitações da base e identificar informações necessárias para apoiar decisões de investimento.
+Uma empresa de produção e distribuição de filmes quer entender onde investir: quais características estão associadas a boas avaliações e quais estão relacionadas ao desempenho financeiro? O objetivo é investigar essa relação com evidências, reconhecer as limitações da base e identificar que informações ainda faltam para apoiar decisões de investimento.
 
 ## Perguntas de negócio
-
-O enunciado apresenta oito perguntas e uma questão complementar sobre orçamento:
 
 | Bloco | Pergunta |
 | --- | --- |
@@ -24,153 +36,104 @@ O enunciado apresenta oito perguntas e uma questão complementar sobre orçament
 | Retorno financeiro × aceitação | Filmes da mesma franquia se comportam de forma semelhante em nota e receita? |
 | Questão complementar | Qual é a relação entre orçamento e avaliação do público? |
 
-## Ferramentas utilizadas
+## Principais conclusões
 
-- **Python:** preparação e transformação dos dados.
-- **pandas e NumPy:** tratamento de valores ausentes, duplicidades e criação de indicadores.
-- **Power BI:** exploração visual e apresentação das análises.
-- **PBIP:** formato do projeto do Power BI.
+- **Receita alta não garante nota alta.** Grandes sucessos comerciais, como *Avengers: Endgame*, *Avatar* e *Jurassic World*, têm avaliações diferentes entre si.
+- **Maior orçamento não garante melhor avaliação.** Os dados não sustentam uma relação automática entre investimento e nota.
+- **Os filmes bem avaliados variam por período, idioma e país.** A maior presença nas décadas de 2010 e 2020 precisa ser lida junto com o total de filmes disponível em cada período.
+- **A base não permite analisar diretores, roteiristas e produtores.** O campo `crew` traz principalmente atores e personagens.
+- **Franquias podem explicar receita alta com avaliação moderada.** É uma hipótese: testá-la exige dados adicionais.
 
-## Fonte dos dados
-
-A base utilizada é `imdb_movies.csv`, identificada na documentação original como proveniente do dataset público **IMDB Movies Dataset**, no Kaggle. Ela reúne título, lançamento, gênero, nota, idioma, país, elenco, orçamento e receita.
-
-O endereço exato da publicação e sua licença precisam ser confirmados antes de redistribuir os dados. Os créditos da base pertencem aos seus respectivos autores.
+As relações exploradas são descritivas e não demonstram causalidade.
 
 ## Preparação dos dados
 
-O script `limpeza_imdb.py` realiza:
+O script [`limpeza_imdb.py`](imdb_dashboard/limpeza_imdb.py):
 
-1. Padronização de textos, espaços e valores ausentes.
-2. Conversão de notas, orçamento e receita para valores numéricos.
-3. Tratamento de notas menores ou iguais a zero como ausentes.
-4. Conversão de datas e criação das colunas de ano e década.
-5. Remoção de filmes sem título e duplicados por título e data de lançamento.
-6. Identificação de conflitos financeiros entre registros duplicados.
-7. Criação de campos financeiros destinados à análise.
-8. Criação de faixas de nota e orçamento e classificação dos filmes bem avaliados.
-9. Extração de atores do campo `crew`, considerando sua estrutura de atores e personagens.
-10. Exportação dos dados tratados em CSV com codificação `utf-8-sig`.
+1. Padroniza textos, espaços e valores ausentes (inclusive espaços invisíveis que quebravam a separação de gêneros).
+2. Converte nota, orçamento e receita para números e trata notas menores ou iguais a zero como ausentes.
+3. Converte datas e cria as colunas de ano e década.
+4. Remove filmes sem título e duplicados por título e data de lançamento, marcando conflitos financeiros entre os duplicados.
+5. Aplica as regras de qualidade financeira descritas abaixo.
+6. Cria faixas de nota e orçamento e classifica os filmes bem avaliados.
+7. Extrai os atores do campo `crew`, que alterna ator e personagem.
+8. Exporta a base tratada em CSV (`utf-8-sig`) para o Power BI.
 
-### Critérios de qualidade dos dados financeiros
+### Regras de qualidade dos dados financeiros
 
-| Indicador | Regra implementada |
+| Indicador | Regra |
 | --- | --- |
-| `receita_suspeita` | Receita positiva repetida em três ou mais registros; mesmo título e receita em dois ou mais registros; casas decimais; valor inferior a 1.000; ou receita informada para status diferente de `Released`. |
+| `receita_suspeita` | Mesmo valor de receita repetido em 3 ou mais filmes; mesmo título e receita em 2 ou mais registros; receita com casas decimais; valor inferior a 1.000; ou receita informada para filme não lançado. |
 | `orcamento_suspeito` | Orçamento inferior a 1.000 ou com casas decimais. |
-| `orcamento_revisar` | Orçamento de 1.000 até menos de 100.000; permanece na análise quando não há outro impedimento. |
-| `financeiro_conflitante` | Orçamento ou receita divergentes entre registros com o mesmo título e data. |
+| `orcamento_revisar` | Orçamento entre 1.000 e 100.000: permanece na análise, mas fica marcado para revisão. |
+| `financeiro_conflitante` | Orçamento ou receita diferentes entre registros com o mesmo título e data. |
 
-Essas regras são **heurísticas de triagem**, não comprovação de erro ou imputação. Repetições e casas decimais precisam ser verificadas na fonte. As exclusões também podem alterar a amostra e influenciar os resultados.
+Essas regras são **heurísticas de triagem**, não prova de erro. Os valores originais são preservados; as análises financeiras usam `orcamento_analise` e `receita_analise`, que excluem os registros sinalizados.
 
-Os valores de orçamento e receita são preservados em campos próprios. Para as análises financeiras, o script disponibiliza `orcamento_analise` e `receita_analise`, que excluem registros sinalizados conforme as regras acima.
-
-O código substitui `AU` por `Indefinido` em `pais_analise`, mantendo o valor original em `pais`. Essa decisão exige validação na documentação da base: o código sozinho não comprova que os registros australianos estejam incorretos.
+O valor `AU` aparece como país em quase metade dos filmes (4.755), inclusive em produções japonesas e americanas. Tratei como valor padrão da base: o original fica em `pais` e a coluna `pais_analise` usa `Indefinido`. Essa decisão ainda precisa ser confirmada na documentação do dataset.
 
 ### Indicadores derivados
 
-- **Bem avaliado:** filme com `score ≥ 80`, na escala utilizada pela base.
-- **Financeiro confiável:** registros com orçamento e receita disponíveis após a triagem; o nome do indicador não representa auditoria externa dos valores.
-- **`lucro`:** receita menos orçamento quando ambos passam pela triagem. É uma diferença simplificada, sem considerar marketing, distribuição e participação dos exibidores.
-- **`roi`:** o script calcula `receita ÷ orçamento`, um múltiplo de receita sobre orçamento. Esse indicador difere do ROI percentual convencional, calculado como `(receita − orçamento) ÷ orçamento`.
+- **Bem avaliado:** score ≥ 80.
+- **Financeiro confiável:** orçamento e receita disponíveis após a triagem (não é auditoria externa dos valores).
+- **`lucro`:** receita menos orçamento. Diferença simplificada, sem marketing, distribuição ou participação dos exibidores.
+- **`roi`:** receita ÷ orçamento, um múltiplo. É diferente do ROI percentual convencional, (receita − orçamento) ÷ orçamento.
 
 ## Dashboard
 
-Conforme a documentação original, o dashboard está organizado em quatro páginas:
-
 | Página | Foco |
 | --- | --- |
-| Avaliação dos filmes | Distribuição das notas e comparação entre gêneros. |
-| Filmes bem avaliados | Filmes com score ≥ 80 por década, idioma e país. |
-| Sucesso comercial | Relação entre receita e nota e filmes de maior receita. |
-| Orçamento e avaliação | Relação entre investimento e avaliação e qualidade dos dados financeiros. |
+| Avaliação dos filmes | Distribuição das notas e comparação entre gêneros |
+| Filmes bem avaliados | Filmes com score ≥ 80 por década, idioma e país |
+| Sucesso comercial | Relação entre receita e nota; filmes de maior receita |
+| Orçamento e avaliação | Relação entre investimento e nota; qualidade dos dados financeiros |
 
-As perguntas sobre profissionais de produção e franquias exigem investigação complementar; essas páginas não resolvem, por si só, todas as questões do enunciado.
+O projeto completo do dashboard está em [`imdb_dashboard/imdb_dashboard.pbip`](imdb_dashboard/imdb_dashboard.pbip), com o relatório (`.Report`) e o modelo semântico (`.SemanticModel`).
 
-## Principais observações
-
-As respostas registradas em `1-Perguntas-de-negocio.docx` apontam que:
-
-- **Receita alta não garante nota alta.** O documento menciona grandes sucessos comerciais com avaliações diferentes, como *Avengers: Endgame*, *Avatar* e *Jurassic World*.
-- **Os filmes bem avaliados apresentam diferenças por período, idioma e país.** A maior presença nas décadas de 2010 e 2020 precisa ser contextualizada pelo total de filmes disponível em cada período.
-- **Maior orçamento não garante melhor avaliação.** A interpretação registrada não sustenta uma relação automática entre investimento e nota.
-- **O campo `crew` não atende à análise dos profissionais de produção.** Ele contém principalmente atores e personagens, faltando informações específicas sobre direção, roteiro e produção.
-- **Reconhecimento de franquias é uma possível explicação para receita alta com avaliação moderada.** Essa hipótese exige dados adicionais para ser testada.
-
-Essas observações resumem o documento de respostas. Os resultados não foram recalculados para este README, pois o dataset e as pastas completas do dashboard não estão entre os arquivos fornecidos. As relações exploradas são descritivas e não demonstram causalidade.
+As perguntas sobre profissionais de produção e franquias exigem dados complementares; o dashboard não as responde sozinho.
 
 ## Limitações e próximos passos
 
-- Obter comentários dos espectadores e quantidade de votos para contextualizar as avaliações.
-- Complementar a base com diretores, roteiristas e produtores, usando identificadores dos filmes para evitar confusão entre títulos homônimos.
-- Identificar franquias e a ordem das sequências para comparar seus resultados.
-- Validar países e valores financeiros na fonte e comparar análises com e sem as regras de exclusão.
+- Obter quantidade de votos para contextualizar as notas.
+- Complementar a base com diretores, roteiristas e produtores, usando identificadores dos filmes para evitar confusão entre homônimos.
+- Identificar franquias e a ordem das sequências.
+- Validar países e valores financeiros na fonte e comparar resultados com e sem as regras de exclusão.
 - Considerar inflação, período de lançamento, distribuição e marketing nas comparações financeiras.
-- Comparar médias junto com o tamanho dos grupos e a proporção de filmes bem avaliados.
 
-## Estrutura do projeto
-
-Estrutura esperada para executar a limpeza e abrir o projeto completo:
+## Estrutura do repositório
 
 ```text
 .
 ├── README.md
-├── limpeza_imdb.py
-├── 1-Perguntas-de-negocio.docx
-├── imdb_dashboard.pbip
-├── imdb_dashboard.Report/
-├── imdb_dashboard.SemanticModel/
-└── data/
-    ├── raw/
-    │   └── imdb_movies.csv
-    └── clean/
-        └── imdb_filmes_limpos_powerbi.csv
+├── requirements.txt
+└── imdb_dashboard/
+    ├── limpeza_imdb.py                   # preparação dos dados
+    ├── imdb_dashboard.pbip               # projeto do Power BI
+    ├── imdb_dashboard.Report/
+    ├── imdb_dashboard.SemanticModel/
+    └── data/
+        └── clean/
+            └── imdb_filmes_limpos_powerbi.csv
 ```
 
-O CSV original, o CSV tratado e as pastas `.Report` e `.SemanticModel` não estão entre os arquivos fornecidos nesta versão. O `.pbip` referencia `imdb_dashboard.Report`; ele não contém sozinho todos os visuais e dados do relatório.
+As consultas SQL e o notebook do Databricks usados na exploração serão adicionados em `sql/` e `notebooks/`.
 
 ## Como executar
 
-### 1. Preparar o ambiente
-
-Com Python instalado, execute na pasta do projeto:
+1. Baixe o arquivo `imdb_movies.csv` do IMDB Movies Dataset, publicado no Kaggle, e salve em `imdb_dashboard/data/raw/imdb_movies.csv`.
+2. Instale as dependências e rode a limpeza:
 
 ```bash
 python -m venv .venv
+source .venv/bin/activate        # Windows: .venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+python imdb_dashboard/limpeza_imdb.py
 ```
 
-Ative o ambiente no Windows PowerShell:
+O script gera `imdb_dashboard/data/clean/imdb_filmes_limpos_powerbi.csv` e mostra no terminal a quantidade de linhas, duplicados removidos e registros sinalizados.
 
-```powershell
-.venv\Scripts\Activate.ps1
-```
+3. Abra `imdb_dashboard/imdb_dashboard.pbip` no Power BI Desktop e atualize o relatório.
 
-Ou no Linux/macOS:
+## Fonte dos dados
 
-```bash
-source .venv/bin/activate
-```
-
-Instale as dependências:
-
-```bash
-python -m pip install pandas numpy
-```
-
-### 2. Executar a limpeza
-
-Coloque o arquivo original em `data/raw/imdb_movies.csv` e execute:
-
-```bash
-python limpeza_imdb.py
-```
-
-O script cria a pasta de saída e gera `data/clean/imdb_filmes_limpos_powerbi.csv`. Durante a execução, informa a quantidade de linhas, duplicados removidos e registros sinalizados.
-
-### 3. Abrir o dashboard
-
-Com as pastas completas do relatório e do modelo disponíveis, abra `imdb_dashboard.pbip` no Power BI Desktop com suporte ao formato PBIP. Ajuste o caminho da fonte de dados para o CSV tratado e atualize o relatório.
-
-## Aprendizados
-
-O projeto exercita a tradução de perguntas de negócio em análises, a preparação de dados com Python e a comunicação de resultados no Power BI. Um aprendizado central é reconhecer o que a base permite responder e quais informações ainda precisam ser obtidas antes de recomendar investimentos.
+IMDB Movies Dataset, publicado no Kaggle. Os créditos da base pertencem aos seus autores. O endereço exato e a licença devem ser confirmados antes de redistribuir os dados.
