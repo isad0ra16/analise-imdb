@@ -45,7 +45,7 @@ A pergunta sobre franquias e as perguntas sobre diretores, produtores e roteiris
 
 ![Capítulo 03 — 9.999 filmes na base tratada](assets/03-origem-dos-dados.png)
 
-Utilizei o **IMDB Movies Dataset**, disponibilizado no Kaggle. O arquivo de entrada esperado pelo script é `imdb_movies.csv`. O endereço exato, a autoria, a versão e a licença do conjunto precisam ser confirmados antes de redistribuição; o fato de o arquivo estar em uma plataforma pública não implica autorização irrestrita para reutilização.
+Utilizei o **IMDB Movies Dataset**, disponibilizado no Kaggle.
 
 A unidade de análise adotada é um registro de filme após a deduplicação por título e data de lançamento. Essa combinação é uma chave prática para este conjunto, não um identificador universal do IMDb. A base resultante possui 9.999 linhas e 37 colunas selecionadas pelo script de preparação.
 
