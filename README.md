@@ -162,7 +162,7 @@ Após a preparação, investiguei as perguntas de negócio utilizando SQL no Dat
 | Receita | Comparação entre maiores receitas e avaliações, sem equiparar faturamento a lucro. |
 | Lacunas | Identificação de informações necessárias para estudar profissionais e franquias com maior profundidade. |
 
-As consultas e o notebook utilizados no Databricks ainda não estão versionados neste repositório. Para tornar a exploração integralmente reproduzível, será necessário recuperá-los e adicioná-los em `sql/` e `notebooks/`. Não apresento consultas ilustrativas como se fossem o código original executado.
+As consultas e os notebooks do Databricks fazem parte do ambiente de exploração e não são distribuídos neste repositório. Os resultados dessa etapa estão consolidados no dashboard Power BI, e a base que alimenta tanto a exploração quanto o relatório pode ser reproduzida com o script de preparação. Não apresento consultas ilustrativas como se fossem o código original executado.
 
 ### Definições financeiras
 
@@ -220,20 +220,35 @@ Transformei as perguntas de negócio em um relatório interativo organizado em q
 
 As quatro páginas permitem explorar diferentes dimensões sem transformar uma nota em medida direta de retorno comercial. O visual do relatório utiliza a identidade escura e dourada do projeto.
 
-O arquivo para abertura está em [`imdb_dashboard/imdb_dashboard.pbip`](imdb_dashboard/imdb_dashboard.pbip). As capturas reais das páginas devem ser acrescentadas após exportação no Power BI Desktop. Nenhuma arte editorial acima é uma captura do relatório.
+O projeto completo está em [`imdb_dashboard/imdb_dashboard.pbip`](imdb_dashboard/imdb_dashboard.pbip), com o relatório em [`imdb_dashboard.Report/`](imdb_dashboard/imdb_dashboard.Report/) e o modelo semântico em [`imdb_dashboard.SemanticModel/`](imdb_dashboard/imdb_dashboard.SemanticModel/). Para explorá-lo, abra o arquivo `.pbip` no Power BI Desktop e atualize os dados, conforme descrito em [Como reproduzir](#como-reproduzir). As artes editoriais deste README são ilustrativas e não representam capturas do relatório.
 
 ---
 
-## Limitações e próximos passos
+## Status do projeto
 
-- Confirmar a versão, autoria, endereço e licença do dataset do Kaggle antes de redistribuir o arquivo tratado.
-- Recuperar e versionar consultas SQL e notebook originais do Databricks.
-- Obter a quantidade de votos, para contextualizar avaliações provenientes de diferentes volumes de usuários.
-- Complementar metadados com identificadores de filmes, profissionais e franquias, evitando confusão entre homônimos.
-- Revisar a classificação do país `AU` na fonte original.
-- Avaliar a sensibilidade das conclusões às regras de triagem financeira, comparando resultados com e sem as exclusões.
-- Considerar inflação, período de lançamento, distribuição e marketing nas comparações financeiras.
-- Acrescentar as capturas reais do dashboard ao README.
+O IMDb Analytics está **concluído dentro do escopo proposto**: preparação dos dados em Python, exploração das perguntas de negócio com SQL no Databricks e relatório interativo de quatro páginas no Power BI, disponível neste repositório em formato PBIP.
+
+Os itens abaixo não são tarefas pendentes de implementação. Descrevem os limites das conclusões e caminhos possíveis para uma investigação futura.
+
+### Limitações metodológicas
+
+- As relações observadas são descritivas e não demonstram causalidade.
+- A base não traz quantidade de votos, o que impede contextualizar notas provenientes de diferentes volumes de usuários.
+- O campo `crew` não identifica diretores, roteiristas e produtores, e não há identificadores de franquia.
+- As regras de qualidade financeira são heurísticas de triagem, e as conclusões financeiras dependem delas.
+- O código de país `AU` foi tratado como possível valor padrão da base, hipótese ainda não confirmada na fonte.
+- Valores financeiros não estão ajustados pela inflação e não incluem custos de marketing e distribuição.
+
+### Possibilidades de aprofundamento
+
+- Incorporar a quantidade de votos e identificadores de filmes, profissionais e franquias, evitando confusão entre homônimos.
+- Testar a sensibilidade das conclusões às regras de triagem financeira, comparando resultados com e sem as exclusões.
+- Ajustar valores pela inflação e considerar período de lançamento, distribuição e marketing nas comparações financeiras.
+- Validar países e valores financeiros em fontes complementares.
+
+### Ressalva sobre o dataset
+
+A versão, a autoria, o endereço e a licença do dataset do Kaggle não foram confirmados. Este repositório não declara permissões de redistribuição; consulte as condições de uso da fonte antes de reutilizar o arquivo original ou a base tratada.
 
 ## Estrutura do repositório
 
